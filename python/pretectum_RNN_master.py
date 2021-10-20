@@ -77,7 +77,7 @@ WN_amp = 0.0025 # where does this value come from? ("amplitude no more than 1% o
 WN_input = WN_amp * np.random.randn(N, len(model_times))
 
 # Initialize 
-J0 = g * np.random.randn(N, N) / np.sqrt(N) # initial weight matrix
+J0 = g * np.random.randn(N, N) / np.sqrt(N) # initialize weight matrix with Gaussian samples scaled by peak conductance constant
 R = np.nan(N, len(t)); # rnn (unit) activities
 AR = np.nan(N+8, length(t)); #augmented activity for training input wts
 JR = np.zeros(N, 1); #product of weights and nonlinear activity
