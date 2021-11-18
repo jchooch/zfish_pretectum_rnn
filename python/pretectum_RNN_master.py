@@ -6,6 +6,9 @@ Terminology:
     Stimuli: we presented moving gratings to the zebrafish. 
         Gratings were presented to each eye independently, in one of four orientations: right, up, left, or down.
         The timecourse of stimuli presented to the fish is one-hot encoded in a matrix loaded from 'stimcourse.csv'.
+Hyperparameters(?): nFree, nFreePre, nRunTot, ...
+Inputs(?): N, [t], znn_acts, inputs, WN_amp, J0, data_times, ...
+Output(?): R, J, W_input, pVars, lastchi2s, chi2, ...
 """
 
 ## Setup Libraries/Packages
@@ -80,8 +83,6 @@ WN_amp = 0.0025 # where does this value come from? ("amplitude no more than 1% o
 WN_input = WN_amp * np.random.randn(N, len(model_times)) # used to be inputN
 
 # Initialize 
-#J0 = g * np.random.randn(N, N) / np.sqrt(N)
-#J = J0
 J = g * np.random.randn(N, N) / np.sqrt(N) # initialize weight matrix with Gaussian samples scaled by peak conductance constant
 
 #################################### UP TO HERE ####################################
@@ -114,7 +115,7 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
     # [epoch_LR,epoch_LU,epoch_LL,epoch_LD,epoch_RR,epoch_RU,epoch_RL,epoch_RD] = deal(0); # set epochs of external inputs to 0
     input_epochs = np.zeros(num_of_inputs) # this replaced the line above
 
-    for tt in range(1, len(model_times)): # time steps for each epoch; used to be for tt = 2:len(t)-2
+    for tt in range(len(model_times)): # time steps for each epoch; used to be for tt = 2:len(t)-2
         tLearn = tLearn + dtModel # update for each time step THIS IS JUST USED TO COUNT WHETHER THE TIMESTEP IS ONE WHERE AN ERROR CAN BE COMPUTED OR NOT
         R[:, tt] = np.tanh(H) # nonlinear transformation of activities
 
@@ -126,23 +127,25 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
         inputs = np.empty((num_of_inputs, N, len(model_times)))
         for i in range(inputs.shape[0]):
             for j in range(N):
-                print('*** TESTING ***')
-                print('i ', i)
-                print('j ', j)
-                print('tt ', tt)
-                print('amp_rgc ', amp_rgc)
-                print('stim_course.iloc[i,tt] ', stim_course.iloc[i,tt])
-                print('W_input[i] ', W_input[i])
-                print(inputs.shape)
-                print(W_input.shape)
-                inputs[i,j,tt] = amp_rgc * stim_course.iloc[i,tt] * W_input[i]
+                inputs[i,j,tt] = amp_rgc * stim_course.iloc[i,tt] * W_input[j,i]
 
         # Update RNN unit activities: multiply activities by weights, add noise, add inputs *** I DON'T THINK THESE SHOULD BE CALLED "JR"... THEY SHOULD JUST BE CALLED "R" ***
         JR = J @ R[:,tt]
+        print('JR shape ', JR.shape)
         JR = JR + WN_input[:,tt]
-        JR = JR + inputs[:,:,tt] # Is this adding these in the right way?
+        print('JR shape ', JR.shape)
+        JR = JR + inputs[:,:,tt] # Is this adding these in the right way? WHAT IS THIS LINE DOING?
+        print('JR shape ', JR.shape)
 
-        H = H + (dtModel * (-H + JR)) / tau; # model prediction of calcium activities at each time step
+        print('*** TESTING ***')
+        print('R[:,tt].shape ', R[:,tt].shape)
+        print('J.shape ', J.shape)
+        print('tau ', tau)
+        print('dtModel ', dtModel)
+        print('H.shape ', H.shape)
+        print('JR.shape ', JR.shape)
+
+        H = H + (dtModel * (-H + JR)) / tau # model prediction of calcium activities at each time step
         
         if tLearn >= dtData: # model updates weights if tLearn exceeds dtData. Since dtData = 2*dt, this happens every other time step.
             tLearn = 0
@@ -178,15 +181,7 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
     pVars[nRun] = pVar
     print('Run: {} \n pVar: {} \n chi2: {}'.format(nRun, pVar, chi2[nRun]))
 
+# WHAT ARE THESE SUMMARY STATS?
 varData = np.var(np.reshape(znn_acts, N * len(data_times)), 1)   # transliterated this directly from the old matlab code. not sure if the dims are all right
 chi2 = chi2 / (np.sqrt(N * len(data_times)) * varData)
 lastchi2s = lastchi2s / (np.sqrt(N * len(data_times)) * varData)
-    
-'''
-Save the following data:
-    R, N, t, chi2, znn_acts(?), tData, tData_ind, nRunTot, nFree, nFreePre, data_start_time, data_end_time, inputN, inputs, J, pVars, lastchi2s, W_input
-'''
-
-## Compute Statistics
-
-## Visualize Outputs and Statistics
