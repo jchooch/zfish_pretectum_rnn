@@ -114,7 +114,7 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
     iLearn = 1 # Used to index znn_acts to subtract from model predicted rates in err.
     # [epoch_LR,epoch_LU,epoch_LL,epoch_LD,epoch_RR,epoch_RU,epoch_RL,epoch_RD] = deal(0); # set epochs of external inputs to 0
     input_epochs = np.zeros(num_of_inputs) # this replaced the line above
-
+                                                        
     for tt in range(len(model_times)): # time steps for each epoch; used to be for tt = 2:len(t)-2
         tLearn = tLearn + dtModel # update for each time step THIS IS JUST USED TO COUNT WHETHER THE TIMESTEP IS ONE WHERE AN ERROR CAN BE COMPUTED OR NOT
         R[:, tt] = np.tanh(H) # nonlinear transformation of activities
