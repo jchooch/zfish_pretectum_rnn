@@ -21,6 +21,8 @@ y = np.array([4, 5, 6])
 z = np.stack((x, y))
 print(z)
 
+# TESTING
+
 znn_acts = pd.read_csv('znn_acts.csv', header=None) # create pandas dataframe of recorded znn calcium activities
 print(len(znn_acts[0]))
 print(len(znn_acts[1]))
