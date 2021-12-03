@@ -11,6 +11,11 @@ import numpy as np
 dtData = 0.5
 dtModel = 0.25
 
+x = np.array([[0, 1, 2], [0, 1, 2], [0, 1, 2]])
+print(x)
+print('axis 0', np.sum(x, axis=0))
+print('axis 1', np.sum(x, axis=1))
+
 tData = np.arange(0, 1000, 0.5)
 print(tData[0])
 print(tData[-1])
@@ -20,6 +25,7 @@ x = np.array([1, 2, 3])
 y = np.array([4, 5, 6])
 z = np.stack((x, y))
 print(z)
+
 
 # TESTING
 
@@ -67,6 +73,6 @@ except NameError:
     nFreePre = 0    # I still need to add a way for nFreePre to possibly be an input (and figure out what it does!)
 '''
 
-tData_ind = (1):(2000)
-data_start_0ndx = 0;
-data_end_0ndx = 1999
+#tData_ind = (1):(2000)
+#data_start_0ndx = 0;
+#data_end_0ndx = 1999

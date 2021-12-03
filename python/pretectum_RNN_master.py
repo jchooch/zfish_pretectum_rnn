@@ -64,7 +64,7 @@ def fit(nFreePre=0):
     pass
 '''
 
-lastchi2s = np.zeros(len(real_times))
+lastchi2s = np.zeros(len(data_times))
 iModelSample = np.zeros(len(real_times))
 
 for i in range(len(real_times)):
@@ -111,7 +111,7 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
     H = znn_acts[0] # Initialize RNN activities with ZNN activities at first time point
     R[:,0] = np.tanh(H) # Nonlinearly transformed activities
     tLearn = 0 # param for when to update J matrix
-    iLearn = 1 # Used to index znn_acts to subtract from model predicted rates in err.
+    iLearn = 0 # Used to index znn_acts to subtract from model predicted rates in err.
     # [epoch_LR,epoch_LU,epoch_LL,epoch_LD,epoch_RR,epoch_RU,epoch_RL,epoch_RD] = deal(0); # set epochs of external inputs to 0
     input_epochs = np.zeros(num_of_inputs) # this replaced the line above
                                                         
@@ -129,30 +129,30 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
             for j in range(N):
                 inputs[i,j,tt] = amp_rgc * stim_course.iloc[i,tt] * W_input[j,i]
 
+        '''
+        I think the stuff with the inputs and input weights here is being done stupidly (above and below).
+        Currently, we are creating a 3D tensor of inputs, then converting the same tensor into the weighted inputs with the same dimensions 
+        (but the dimensions should be reduced because we should no longer care about the different kinds of input to a neuron, since they should already have been weighted and summed).
+        '''
+
         # Update RNN unit activities: multiply activities by weights, add noise, add inputs *** I DON'T THINK THESE SHOULD BE CALLED "JR"... THEY SHOULD JUST BE CALLED "R" ***
         JR = J @ R[:,tt]
-        print('JR shape ', JR.shape)
         JR = JR + WN_input[:,tt]
-        print('JR shape ', JR.shape)
-        JR = JR + inputs[:,:,tt] # Is this adding these in the right way? WHAT IS THIS LINE DOING?
-        print('JR shape ', JR.shape)
-
-        print('*** TESTING ***')
-        print('R[:,tt].shape ', R[:,tt].shape)
-        print('J.shape ', J.shape)
-        print('tau ', tau)
-        print('dtModel ', dtModel)
-        print('H.shape ', H.shape)
-        print('JR.shape ', JR.shape)
+        weighted_inputs = np.sum(inputs, axis=0) # added this line to sum over inputs of different types, to produce one input per neuron per timepoint (I think this makes sense...?)
+        JR = JR + weighted_inputs[:,tt] # Is this adding these in the right way? WHAT IS THIS LINE DOING? changed inputs[:,:,tt] to weighted_inputs[:,tt]
 
         H = H + (dtModel * (-H + JR)) / tau # model prediction of calcium activities at each time step
         
         if tLearn >= dtData: # model updates weights if tLearn exceeds dtData. Since dtData = 2*dt, this happens every other time step.
             tLearn = 0
-            err = JR - znn_acts[:, iLearn+1] # As in Andalman. znn_acts has entries every 0.5 s and JR at every 0.25 s.
+            print('iLearn: ', iLearn)
+            err = JR - znn_acts.iloc[:, iLearn] # As in Andalman. znn_acts has entries every 0.5 s and JR at every 0.25 s. (used to index to iLearn+1)
             meanerr2 = np.mean(np.power(err, 2)) # what is displayed as chi2 when training. Use it to assess model convergence.
+            print('meanerr2: ', meanerr2)
             chi2[nRun] = chi2[nRun] + meanerr2 # nRun is epoch number so accumulates meanerr2 every update to weight matrix. Want this to decreaase over training
+            print('chi2[nRun]: ', chi2[nRun])
             lastchi2s[iLearn] = meanerr2 # The last meanerr2 for the last weight update during an epoch.
+            print('lastchi2s[iLearn]: ', lastchi2s[iLearn])
             if (learn == True) and (nRun <= nRunTot - nFree) and (nRun > nFreePre): # nFree and nFreePre are weight freezing parameters. learn is set to 1 at start of code.
                 # augmented Dyn variable. Each trainable external input is added here.
                 AR = R[:,tt]            
@@ -160,7 +160,7 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
                     AR = np.stack(AR, input_epochs[i])
 
                 # compute estimate of inverse cross correlation matrix of network activities, to scale weight update. See Sussillo & Abbott (2009)
-                k = PJ @ AR  
+                k = PJ @ AR
                 rPr = np.transpose(AR) @ k
                 c = 1.0 / (1.0 + rPr)
                 PJ = PJ - c @ (k @ np.transpose(k))
@@ -172,11 +172,11 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
                 
                 J = J - c @ err @ np.transpose(k[:N]) # update J by err and proportional to inverse cross correlation network rates
                 
-            iLearn = iLearn + 1 # Set index of Adata to time of next frame
+            iLearn = iLearn + 1 # Set index of znn_acts (formerly Adata) to time of next frame
             input_epochs = np.zeros(len(input_epochs)) # Set epochs of external inputs to 0
 
     # Summary of model fit - pVar means percentage of variance explained
-    rModelSample = R[:, iModelSample]    
+    rModelSample = R[:, iModelSample]    # I don't understand the function of this... iModelSample was created as a vector, so how can it be used as an index?
     pVar = 1 - np.power((np.linalg.norm(znn_acts - rModelSample) / (np.sqrt(N * len(data_times)) * stdevData)), 2)
     pVars[nRun] = pVar
     print('Run: {} \n pVar: {} \n chi2: {}'.format(nRun, pVar, chi2[nRun]))
