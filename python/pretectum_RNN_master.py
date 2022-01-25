@@ -176,7 +176,10 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
             input_epochs = np.zeros(len(input_epochs)) # Set epochs of external inputs to 0
 
     # Summary of model fit - pVar means percentage of variance explained
-    rModelSample = R[:, iModelSample]    # I don't understand the function of this... iModelSample was created as a vector, so how can it be used as an index?
+    print('iModelSample: ', iModelSample)
+    print('R[:] ', R[:])
+    print(np.sum(iModelSample))
+    rModelSample = R[:, int(iModelSample)]    # I don't understand the function of this... iModelSample was created as a vector, so how can it be used as an index?
     pVar = 1 - np.power((np.linalg.norm(znn_acts - rModelSample) / (np.sqrt(N * len(data_times)) * stdevData)), 2)
     pVars[nRun] = pVar
     print('Run: {} \n pVar: {} \n chi2: {}'.format(nRun, pVar, chi2[nRun]))
