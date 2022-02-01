@@ -33,7 +33,7 @@ if with_stimuli == True:
 
 ## Model Hyperparameters (exogenous to data)
 learn = True # what does this do?
-nRunTot = 1500 # number of steps (what is a step? an epoch?) [maybe this should be called number of runs]
+nRunTot = 10 # number of steps (what is a step? an epoch?) [maybe this should be called number of runs] #1500
 amp_rgc = 0.025 # scale/amplitude of RGC inputs; Andalman et al. recommended 10x larger than noise amplitude
 # something about a control parameter here...
 g = 1.25   # Peak synaptic conductance constant; Andalman used 1.2-1.3. Elsewhere 1.0-1.5 recommended. (Where?)
@@ -54,27 +54,43 @@ real_times = np.arange(real_start_time, real_end_time, 1)
 data_times = np.arange(real_start_time, real_end_time, dtData)
 model_times = np.arange(real_start_time, real_end_time, dtModel)
 
+# Normalize znn_acts
+for i in range(len(znn_acts)):
+    znn_acts.iloc[i] = znn_acts.iloc[i] / np.max(np.max(znn_acts))
+    
+znn_acts = znn_acts / np.max(np.max(znn_acts)) # normalize activations
+print(znn_acts.shape)
+for act in znn_acts:
+    if act > 0.999: act = 0.999
+    if act < -0.999: act = -0.999
+    #act = np.min(act, 0.999)
+    #act = np.max(act, -0.999)
+
+'''   
+for i in range(len(znn_acts)):
+    znn_acts.iloc[i] = np.amin([znn_acts.iloc[i], 0.999])  # clipping activations above 1
+    znn_acts.iloc[i] = np.amax([znn_acts.iloc[i], -0.999])    # clipping activations below -1
+'''
+
 ## Train Model (see <visualize> variable in Settings ^^^)
 '''
 Things to keep track of: loss/error/chi2, updates, pVar, ...?
-'''
-'''
+
 def fit(nFreePre=0):
     outputname = 'rnn_output_' + str(date.today())
     pass
 '''
 
 lastchi2s = np.zeros(len(data_times))
-iModelSample = np.zeros(len(real_times))
+iModelSample = np.zeros(len(data_times)) # this used to use real_times
 
-for i in range(len(real_times)):
-    tModelSample = np.min(np.abs(model_times - real_times[i]))     # WHAT IS THIS DOING?
-    iModelSample[i] = np.min(np.abs(model_times - real_times[i]))  # WHAT IS THIS DOING?
-'''WTF is this...
-for i=1:length(real_times)
-    [tModelSample, iModelSample(i)] = min(abs(real_times(i)-t));
-end
-'''
+for i in range(len(data_times)):
+    test = np.zeros(len(model_times))
+    test[:] = data_times[i]
+    iModelSample[i] = np.argmin(np.abs(test - model_times))
+
+#for i in range(len(real_times)):
+#    iModelSample[i] = np.argmin(np.abs(model_times - real_times[i]))  # THIS FINDS THE CLOSEST MODEL TIMEPOINT TO EVERY GIVEN DATA TIMEPOINT
 
 stdevData = np.std(znn_acts.to_numpy().flatten()) # why is this computed all the way up here?!
 
@@ -157,7 +173,10 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
                 # augmented Dyn variable. Each trainable external input is added here.
                 AR = R[:,tt]            
                 for i in range(num_of_inputs):
-                    AR = np.stack(AR, input_epochs[i])
+                    print('AR shape', AR.shape)
+                    print('input_epochs shape', input_epochs.shape)
+                    print('input_epochs[i] shape', input_epochs[i].shape)
+                    AR = np.stack((AR, input_epochs[i]))
 
                 # compute estimate of inverse cross correlation matrix of network activities, to scale weight update. See Sussillo & Abbott (2009)
                 k = PJ @ AR
@@ -168,7 +187,7 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
                 # Updating external input weights if they are on
                 for i in range(num_of_inputs):
                     if input_epochs[i] == 1:
-                        W_input[:,i] = W_input[:,i] - c @ err @ k[i-num_of_inputs] # why is k indexed in this way?
+                        W_input[:,i] = W_input[:,i] - c @ err @ k[i - num_of_inputs] # why is k indexed in this way?
                 
                 J = J - c @ err @ np.transpose(k[:N]) # update J by err and proportional to inverse cross correlation network rates
                 
@@ -176,15 +195,27 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
             input_epochs = np.zeros(len(input_epochs)) # Set epochs of external inputs to 0
 
     # Summary of model fit - pVar means percentage of variance explained
-    print('iModelSample: ', iModelSample)
-    print('R[:] ', R[:])
-    print(np.sum(iModelSample))
-    rModelSample = R[:, int(iModelSample)]    # I don't understand the function of this... iModelSample was created as a vector, so how can it be used as an index?
-    pVar = 1 - np.power((np.linalg.norm(znn_acts - rModelSample) / (np.sqrt(N * len(data_times)) * stdevData)), 2)
+    rModelSample = np.zeros((N, len(data_times)))
+    counter = 0
+
+    for sample_time in iModelSample:
+        rModelSample[:, counter] = R[:, int(sample_time)]
+        #rModelSample = np.vstack((rModelSample, sample))
+        counter += 1
+
+    znn4shape = znn_acts.to_numpy()
+    print('znn_acts shape', znn4shape.shape)
+    print('rModelSample shape', rModelSample.shape)
+    print('R shape', R.shape)
+    pVar = 1 - np.power((np.linalg.norm(znn_acts.to_numpy() - rModelSample) / (np.sqrt(N * len(data_times)) * stdevData)), 2)
     pVars[nRun] = pVar
     print('Run: {} \n pVar: {} \n chi2: {}'.format(nRun, pVar, chi2[nRun]))
 
 # WHAT ARE THESE SUMMARY STATS?
 varData = np.var(np.reshape(znn_acts, N * len(data_times)), 1)   # transliterated this directly from the old matlab code. not sure if the dims are all right
-chi2 = chi2 / (np.sqrt(N * len(data_times)) * varData)
+chi2 = chi2 / (np.sqrt(N * len(data_times)) * varData)  # chi2 = sum_i (observation_i - expectation_i)**2 / expectation_i
 lastchi2s = lastchi2s / (np.sqrt(N * len(data_times)) * varData)
+
+'''
+
+'''
