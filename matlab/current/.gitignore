@@ -1,4 +1,4 @@
 # .gitignore for pretectum rnn
 
-# ignore large saved outputs
-./ensemble/*
+# ignore large saved outputs (for some fucking reason you can't write "./ensemble/*" but you can write "ensemble/*"... i hate git)
+ensemble/*
