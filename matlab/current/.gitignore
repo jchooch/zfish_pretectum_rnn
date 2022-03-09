@@ -1,0 +1,4 @@
+# .gitignore for pretectum rnn
+
+# ignore large saved outputs
+./ensemble/*

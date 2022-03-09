@@ -176,6 +176,8 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
                     print('AR shape', AR.shape)
                     print('input_epochs shape', input_epochs.shape)
                     print('input_epochs[i] shape', input_epochs[i].shape)
+                    print('input_epochs: ', input_epochs)
+                    print('input_epochs[i]: ', input_epochs[i])
                     AR = np.stack((AR, input_epochs[i]))
 
                 # compute estimate of inverse cross correlation matrix of network activities, to scale weight update. See Sussillo & Abbott (2009)
@@ -215,7 +217,3 @@ for nRun in range(nRunTot): # Epoch number, out of number of epochs [THIS SHOULD
 varData = np.var(np.reshape(znn_acts, N * len(data_times)), 1)   # transliterated this directly from the old matlab code. not sure if the dims are all right
 chi2 = chi2 / (np.sqrt(N * len(data_times)) * varData)  # chi2 = sum_i (observation_i - expectation_i)**2 / expectation_i
 lastchi2s = lastchi2s / (np.sqrt(N * len(data_times)) * varData)
-
-'''
-
-'''
