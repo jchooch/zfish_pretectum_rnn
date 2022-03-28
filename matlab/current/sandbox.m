@@ -1,6 +1,7 @@
 % sandbox.m
 
 function sandbox()
+    
     cmap = redblue(100);
     N = 10;
     

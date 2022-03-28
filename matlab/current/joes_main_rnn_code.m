@@ -82,9 +82,7 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
     N = double(N);
 
     tData_ind = (data_start_0ndx+1):(data_end_0ndx+1);  
-   
     tData = [0:dtData:1999*dtData]; %How many times J is updated
-    
     
     t = data_start_time:dt:data_end_time;  %Number of integration time steps
     
@@ -179,19 +177,6 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
 
     chi2 = zeros(1, nRunTot);
     pVars = zeros(1, nRunTot);
-    
-    %{
-    if plotStatus
-        f = figure('Position',[100 100 1800 600]);
-        f2 = figure('Position',[100 100 1800 600]);
-        f3 = figure('Position',[100 100 1800 600]);
-        f4 = figure('Position',[100 100 1800 600]);
-        f5 = figure('Position',[100 100 1800 600]);
-        f6 = figure('Position',[100 100 1800 600]);
-        f7 = figure('Position',[100 100 1800 600]);
-        f8 = figure('Position',[100 100 1800 600]);
-    end
-    %}
 
     for nRun = 1:nRunTot %Number of epochs
         H = Adata(:, 1); %Initialize activities of all neurons with real values at first time point
