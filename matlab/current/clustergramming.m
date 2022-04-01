@@ -2,7 +2,7 @@
 
 %cmap = redblue(100);
 
-load('/Users/joechoo-choy/Downloads/ensemble/output_1.mat', 'J');
+load('/Users/joechoo-choy/Documents/github_jchooch/zfish_pretectum_rnn/matlab/current/ensemble/output_1.mat', 'J');
 
 %{
 accumulated_Js = J(:)';

@@ -3,7 +3,7 @@
 number_of_nets = 100;
 
 for filenumber = 1:number_of_nets
-    load(sprintf('/Users/joechoo-choy/Downloads/ensemble/output_%d.mat', filenumber), 'J');
+    load(sprintf('/Users/joechoo-choy/Documents/github_jchooch/zfish_pretectum_rnn/matlab/current/ensemble/output_%d.mat', filenumber), 'J');
     if filenumber == 1
         accumulated_Js = J(:)';
     else
