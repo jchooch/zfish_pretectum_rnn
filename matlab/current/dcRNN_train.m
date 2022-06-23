@@ -1,8 +1,7 @@
 % dcRNN_train.m
 
-function  [J, N, T, varData, chi2] = dcRNN_train(data, inputs, number_of_epochs)
+function  [J, R, N, T, varData, chi2, pVars] = dcRNN_train(data, inputs, number_of_epochs)
     N = size(data, 1);
-    % N = double(N);
     T = size(data, 2);
     C = size(inputs, 1); % C is the number of input channelsm
     if size(inputs, 2) ~= T
@@ -64,14 +63,15 @@ function  [J, N, T, varData, chi2] = dcRNN_train(data, inputs, number_of_epochs)
     fprintf('length(t): %d\n', length(t));
     assert(data_steps >= length(t) * dt);
 
-    chi2 = nan(1, number_of_epochs);
-    pVars = nan(1, number_of_epochs);
+    chi2 = zeros(1, number_of_epochs);
+    pVars = zeros(1, number_of_epochs);
 
     H = nan(N, T);
 
     for epoch = 1:number_of_epochs %Number of epochs
         H(:, 1) = data(:, 1); %Initialize activities of all neurons with real values at first time point
         R(:, 1) = tanh(H(:, 1)); %nonlinearly transformed activities
+        H(:, 2) = J * R(:, 1);
         tLearn = 0; %param for when to update J matrix
         iLearn = 1; %Used to index Adata to subtract from model predicted rates in err.
         
@@ -85,9 +85,7 @@ function  [J, N, T, varData, chi2] = dcRNN_train(data, inputs, number_of_epochs)
                     stimuli_epochs(channel) = 1; 
                 end
             end
-
             JR = J * R(:, tt) + inputN(:, tt); %product of synaptic strength weight matrix and nonlinear activities + gaussian noise
-            
             % size is still good here
             %external inputs at each time step - input on if time vectors are 1 at time tt
             for channel = 1:C
@@ -114,16 +112,6 @@ function  [J, N, T, varData, chi2] = dcRNN_train(data, inputs, number_of_epochs)
                     %Updating external input weights if they are on
                     for channel = 1:C
                         if stimuli_epochs(channel) == 1
-                            disp('size of k(end-8-channel)')
-                            disp(size(k(end-8-channel)))
-                            disp('size of err')
-                            disp(size(err))
-                            disp('size of c')
-                            disp(size(c))
-                            disp('size of input_weights(channel)')
-                            disp(size(input_weights(channel)))
-                            disp('size of (c * err * k(end-8-channel))')
-                            disp(size((c * err * k(end-8-channel))))
                             input_weights(channel, :) = input_weights(channel, :) - transpose(c * err * k(end-8-channel));
                         end
                     end                    
@@ -137,18 +125,8 @@ function  [J, N, T, varData, chi2] = dcRNN_train(data, inputs, number_of_epochs)
         %Summary of model fit - pVar means percentage of variance explained
         rModelSample = R(:, iModelSample);
         %pVar = 1 - (norm(data - rModelSample, 'fro')/(sqrt(N*length(tData))*stdData)).^2;
-        disp('size of data')
-        disp(size(data))
-        disp('size of R')
-        disp(size(R))
-        disp('length of tData')
-        disp(length(tData))
-        disp('size of (sqrt(N*length(tData))*data)')
-        disp(size(sqrt(N*length(tData))*data))
-        disp("norm(data - R, 'fro')")
-        disp(norm(data - R, 'fro'))
-        std_dev_data = std(reshape(data.',1,[]))
-        pVar = 1 - (norm(data - R, 'fro')/(sqrt(N*length(tData))*std_dev_data)).^2;
+        std_dev_data = std(reshape(data.',1,[]));
+        pVar = 1 - (norm(data - R(:, 1:2:end-1), 'fro')/(sqrt(N*length(tData))*std_dev_data)).^2; % used to be just R
         pVars(epoch) = pVar;
         fprintf('trial=%d pVar=%f chi2=%f\n', epoch, pVar, chi2(epoch));
     end

@@ -2,6 +2,16 @@
 
 function sandbox()
     
+    data = load('calact410Nstd.mat');
+    data = data.calact410Nstd;
+    inputs = matfile('inputs.mat');
+    inputs = inputs.inputs;
+    max_epochs = 50;
+    val_epochs = 5;
+
+    [J, R, N, T, varData, chi2, pVars, valchi2, valpVars] = simple_train_holdout(data, inputs, max_epochs, val_epochs)
+    
+    %{
     cmap = redblue(100);
     N = 10;
     
@@ -70,5 +80,5 @@ function sandbox()
     disp(sum(sum(J_prime_0 == 0)))
     disp('Number of 0s using majority-imputation')
     disp(sum(sum(J_prime_1 == 0)))
-
+    %}
 end

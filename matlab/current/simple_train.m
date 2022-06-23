@@ -62,20 +62,18 @@ function  [J, R, N, T, varData, chi2, pVars] = simple_train(data, inputs, number
             err = JR - data(:, timepoint+1); %As in Andalman. Adata has entries every 0.5 s and JR at every 0.25 s.
             meanerr2 = mean(err.^2); %what is displayed as chi2 when training. Use it to assess model convergence.
             chi2(epoch) = chi2(epoch) + meanerr2;
-            if epoch <= number_of_epochs
-                AR = [R(:, timepoint); inputs(:, timepoint)]; %augmented Dyn variable. Each trainable external input is added here.
-                k = PJ*AR;
-                rPr = AR'*k;
-                c = 1.0/(1.0 + rPr);
-                PJ = PJ - c*(k*k');
-                %Updating external input weights if they are on
-                for channel = 1:C
-                    if inputs(channel, timepoint) == 1
-                        input_weights(channel, :) = input_weights(channel, :) - transpose(c * err * k(end-8-channel));
-                    end
-                end                    
-                J = J - c*err*k(1:N)'; %update J by err and proportional to inverse cross correlation network rates
-            end
+            AR = [R(:, timepoint); inputs(:, timepoint)]; %augmented Dyn variable. Each trainable external input is added here.
+            k = PJ*AR;
+            rPr = AR'*k;
+            c = 1.0/(1.0 + rPr);
+            PJ = PJ - c*(k*k');
+            %Updating external input weights if they are on
+            for channel = 1:C
+                if inputs(channel, timepoint) == 1
+                    input_weights(channel, :) = input_weights(channel, :) - transpose(c * err * k(end-8-channel));
+                end
+            end                    
+            J = J - c*err*k(1:N)'; %update J by err and proportional to inverse cross correlation network rates
             stimuli_epochs = zeros(C, 1);
         end
         R(:, T) = tanh(H(:, T));

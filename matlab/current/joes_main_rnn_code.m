@@ -1,15 +1,9 @@
-function  joes_main_rnn_code(filenumber, plotting_parameter)
-    simfilename = '/Users/joechoo-choy/Downloads/calact410Nstd.mat'; %replace with input path
-    outputname = sprintf('/Users/joechoo-choy/Downloads/ensemble/output_%d', filenumber);
+function  joes_main_rnn_code()
+    plotStatus = 1;
+    simfilename = '/Users/joechoo-choy/Documents/github_jchooch/zfish_pretectum_rnn/matlab/current/calact410Nstd.mat'; %replace with input path
+    outputname = sprintf('/Users/joechoo-choy/Documents/github_jchooch/zfish_pretectum_rnn/output_last');
     %outputname ='/Users/joechoo-choy/Downloads/output_12';
     fname = '/Users/joechoo-choy/Downloads/';
-    fname2 = '/Users/joechoo-choy/Downloads/';
-    fname3 = '/Users/joechoo-choy/Downloads/';
-    fname4 = '/Users/joechoo-choy/Downloads/';
-    fname5 = '/Users/joechoo-choy/Downloads/';
-    fname6 = '/Users/joechoo-choy/Downloads/';
-    fname7 = '/Users/joechoo-choy/Downloads/';
-    fname8 = '/Users/joechoo-choy/Downloads/';
     %colmap = '/Users/joechoo-choy/Downloads/redblue/redblue.mat';
     learn = 1; %lets RNN learn
     nRunTot = 50; %number of steps
@@ -69,8 +63,6 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
     selectivities(206:268) = 4; % backward binocular
     selectivities(269:350) = 5; % left medial
     selectivities(351:410) = 6; % left lateral
-
-    plotStatus     = plotting_parameter;    % whether to plot data fits during training
     
     %Frames and Time length
     %if dtData = 0.5 then data interval is twice length of start:end.
@@ -143,23 +135,10 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
     tRL(48:78)=1;tRL(1980:2010)=1;tRL(2320:2350)=1;tRL(3002:3032)=1;
     tRD(274:304)=1;tRD(730:760)=1;tRD(1638:1668)=1;tRD(1866:1896)=1;tRD(2092:2122)=1;tRD(2206:2236)=1;tRD(3116:3146)=1;tRD(3342:3372)=1;tRD(3570:3600)=1;tRD(3798:3828)=1;tRD(3912:3940)=1;
     
-    %tstim
-    tLStim = zeros(1,2000);
-
-    tLStim(:,592:607)=1;tLStim(:,876:891)=1;tLStim(:,1387:1402)=1;
-    tLStim(:,81:96)=2;tLStim(:,251:266)=2;tLStim(:,365:380)=2;tLStim(:,535:550)=2;tLStim(:,819:834)=2;tLStim(:,1103:1118)=2;tLStim(:,1273:1288)=2;tLStim(:,1330:1345)=2;tLStim(:,1443:1458)=2;tLStim(:,1557:1572)=2;
-    tLStim(:,24:39)=3;tLStim(:,990:1005)=3;tLStim(:,1160:1175)=3;tLStim(:,1501:1516)=3;
-    tLStim(:,137:152)=4;tLStim(:,421:436)=4;tLStim(:,706:721)=4;tLStim(:,1217:1232)=4;tLStim(:,1615:1630)=4;tLStim(:,1842:1857)=4;
-
-    tRStim = zeros(1,2000);
-    tRStim(:,592:607)=1;tRStim(:,876:891)=1;tRStim(:,1387:1402)=1;
-    tRStim(:,251:266)=2;tRStim(:,308:323)=2;tRStim(:,478:493)=2;tRStim(:,535:550)=2;tRStim(:,649:664)=2;tRStim(:,706:721)=2;tRStim(:,762:777)=2;tRStim(:,1273:1288)=2;tRStim(:,1330:1345)=2;
-    tRStim(:,24:39)=3;tRStim(:,990:1005)=3;tRStim(:,1160:1175)=3;tRStim(:,1501:1516)=3;
-    tRStim(:,137:152)=4;tRStim(:,365:380)=4;tRStim(:,819:834)=4;tRStim(:,933:948)=4;tRStim(:,1046:1061)=4;tRStim(:,1103:1118)=4;tRStim(:,1557:1572)=4;tRStim(:,1671:1686)=4;tRStim(:,1785:1800)=4;tRStim(:,1899:1914)=4;tRStim(:,1955:1970)=4;
-
     t_hm = [0:0.5:1999*0.5];
-
-    tStim = [tLStim;tRStim];
+    load('left_stim_times.mat')
+    load('right_stim_times.mat')
+    tStim = [left_stim_times; right_stim_times];
     
     %amp - Appears Andalman et al. recommends 10x larger than amplitude of
     %noise
@@ -367,7 +346,7 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
             title('Percent Variance Explained');
             set(gca,'Box','off','TickDir','out','FontSize',14);
             drawnow;
-            saveas(f2,fullfile(fname2,sprintf('epoch%d.jpg',nRun)));
+            saveas(f2,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
             end
             
             if plotStatus
@@ -382,7 +361,7 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
             title('Convergence');
             set(gca,'Box','off','TickDir','out','FontSize',14);
             drawnow;
-            saveas(f3,fullfile(fname3,sprintf('epoch%d.jpg',nRun)));
+            saveas(f3,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
             end
             
             %{
@@ -451,10 +430,10 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
                 %addYLabel(Jhm,'Postsynaptic','FontSize',12);
                 drawnow;
                 end
-                %saveas(f4,fullfile(fname4,sprintf('epoch%d.jpg',nRun)));
-                %saveas(f4,fullfile(fname4,sprintf('epoch%d.eps',nRun)),'epsc');
-                saveas(f4,fullfile(fname4,sprintf('epoch%d.jpg',nRun)));
-                %exportgraphics(f4,fullfile(fname4,sprintf('epoch%d.pdf',nRun)),'BackgroundColor','none','ContentType','vector');
+                %saveas(f4,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
+                %saveas(f4,fullfile(fname,sprintf('epoch%d.eps',nRun)),'epsc');
+                saveas(f4,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
+                %exportgraphics(f4,fullfile(fname,sprintf('epoch%d.pdf',nRun)),'BackgroundColor','none','ContentType','vector');
 
             end
             %}
@@ -524,10 +503,10 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
                 %addYLabel(Jhm,'Postsynaptic','FontSize',12);
                 drawnow;
                 end
-                %saveas(f5,fullfile(fname5,sprintf('epoch%d.jpg',nRun)));
-                %saveas(f5,fullfile(fname5,sprintf('epoch%d.eps',nRun)),'epsc');
-                saveas(f5,fullfile(fname5,sprintf('epoch%d.jpg',nRun)));
-                %exportgraphics(f5,fullfile(fname5,sprintf('epoch%d.jpeg',nRun)),'BackgroundColor','none','ContentType','vector');
+                %saveas(f5,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
+                %saveas(f5,fullfile(fname,sprintf('epoch%d.eps',nRun)),'epsc');
+                saveas(f5,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
+                %exportgraphics(f5,fullfile(fname,sprintf('epoch%d.jpeg',nRun)),'BackgroundColor','none','ContentType','vector');
             end
             %}
             %{
@@ -600,10 +579,10 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
                 %addYLabel(Jhm,'Postsynaptic','FontSize',12);
                 drawnow;
                 end
-                %saveas(f5,fullfile(fname5,sprintf('epoch%d.jpg',nRun)));
-                %saveas(f5,fullfile(fname5,sprintf('epoch%d.eps',nRun)),'epsc');
-                saveas(f6,fullfile(fname6,sprintf('epoch%d.jpg',nRun)));
-                %exportgraphics(f5,fullfile(fname5,sprintf('epoch%d.jpeg',nRun)),'BackgroundColor','none','ContentType','vector');
+                %saveas(f5,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
+                %saveas(f5,fullfile(fname,sprintf('epoch%d.eps',nRun)),'epsc');
+                saveas(f6,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
+                %exportgraphics(f5,fullfile(fname,sprintf('epoch%d.jpeg',nRun)),'BackgroundColor','none','ContentType','vector');
             end
             %}
         end
@@ -672,11 +651,11 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
             %addXLabel(Jhm,'Presynaptic','FontSize',12);
             %addYLabel(Jhm,'Postsynaptic','FontSize',12);
             drawnow;
-            saveas(f7,fullfile(fname7,sprintf('epoch%d.jpg',nRun)));
+            saveas(f7,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
             end
-            %saveas(f5,fullfile(fname5,sprintf('epoch%d.jpg',nRun)));
-            %saveas(f5,fullfile(fname5,sprintf('epoch%d.eps',nRun)),'epsc');
-            %exportgraphics(f5,fullfile(fname5,sprintf('epoch%d.jpeg',nRun)),'BackgroundColor','none','ContentType','vector');
+            %saveas(f5,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
+            %saveas(f5,fullfile(fname,sprintf('epoch%d.eps',nRun)),'epsc');
+            %exportgraphics(f5,fullfile(fname,sprintf('epoch%d.jpeg',nRun)),'BackgroundColor','none','ContentType','vector');
         end
         %{
         if nRun == nRunTot
@@ -749,10 +728,10 @@ function  joes_main_rnn_code(filenumber, plotting_parameter)
             %addYLabel(Jhm,'Postsynaptic','FontSize',12);
             drawnow;
             end
-            %saveas(f5,fullfile(fname5,sprintf('epoch%d.jpg',nRun)));
-            %saveas(f5,fullfile(fname5,sprintf('epoch%d.eps',nRun)),'epsc');
-            saveas(f8,fullfile(fname8,sprintf('epoch%d.jpg',nRun)));
-            %exportgraphics(f5,fullfile(fname5,sprintf('epoch%d.jpeg',nRun)),'BackgroundColor','none','ContentType','vector');
+            %saveas(f5,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
+            %saveas(f5,fullfile(fname,sprintf('epoch%d.eps',nRun)),'epsc');
+            saveas(f8,fullfile(fname,sprintf('epoch%d.jpg',nRun)));
+            %exportgraphics(f5,fullfile(fname,sprintf('epoch%d.jpeg',nRun)),'BackgroundColor','none','ContentType','vector');
         end
         %}
     end

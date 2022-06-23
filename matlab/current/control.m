@@ -42,7 +42,10 @@ title('Neuronal activations during forward pass')
 xlabel('Time')
 ylabel('Neuron')
 
-[J_dcRNN, R_model, N, T, varData, chi2, pVars] = simple_train(R_targets, inputs, 50);
+R_bio = load('calact410Nstd.mat');
+R_bio = R_bio.calact410Nstd;
+[J_dcRNN, R_model, N, T, varData, chi2, pVars] = dcRNN_train(R_targets, inputs, 50);
+%[J_dcRNN, R_model, N, T, varData, chi2, pVars] = dcRNN_train(R_bio, inputs, 50);
 
 figure(4)
 plot(chi2)
