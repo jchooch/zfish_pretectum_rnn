@@ -3,7 +3,7 @@
 function  [J, R, N, T, varData, chi2, pVars] = dcRNN_train(data, inputs, number_of_epochs)
     N = size(data, 1);
     T = size(data, 2);
-    C = size(inputs, 1); % C is the number of input channelsm
+    C = size(inputs, 1); % C is the number of input channels
     if size(inputs, 2) ~= T
         disp(['Second dimension of inputs does not match second dimension of data. \n' ...
             'Data should have shape N X T. Inputs should have shape C X T.'])

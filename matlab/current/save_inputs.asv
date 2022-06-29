@@ -61,11 +61,31 @@ save('inputs.mat','inputs');
 %tstim
 
 %{
+Right eye:
+tRStim = zeros(1,2000);
+Forward: tRstim(:,592:607)=1;tRstim(:,876:891)=1;tRstim(:,1387:1402)=1;
+Right: tRstim(:,81:96)=2;tRstim(:,251:266)=2;tRstim(:,365:380)=2;tRstim(:,535:550)=2;tRstim(:,819:834)=2;tRstim(:,1103:1118)=2;tRstim(:,1273:1288)=2;tRstim(:,1330:1345)=2;tRstim(:,1443:1458)=2;tRstim(:,1557:1572)=2;
+Backward: tRstim(:,24:39)=3;tRstim(:,990:1005)=3;tRstim(:,1160:1175)=3;tRstim(:,1501:1516)=3;
+Left: tRstim(:,137:152)=4;tRstim(:,421:436)=4;tRstim(:,706:721)=4;tRstim(:,1217:1232)=4;tRstim(:,1615:1630)=4;tRstim(:,1842:1857)=4;
+
 Left eye:
+tLstim = zeros(1,2000);
 Forward: tLstim(:,592:607)=1;tLstim(:,876:891)=1;tLstim(:,1387:1402)=1;
 Right: tLstim(:,251:266)=2;tLstim(:,308:323)=2;tLstim(:,478:493)=2;tLstim(:,535:550)=2;tLstim(:,649:664)=2;tLstim(:,706:721)=2;tLstim(:,762:777)=2;tLstim(:,1273:1288)=2;tLstim(:,1330:1345)=2;
 Backward: tLstim(:,24:39)=3;tLstim(:,990:1005)=3;tLstim(:,1160:1175)=3;tLstim(:,1501:1516)=3;
 Left: tLstim(:,137:152)=4;tLstim(:,365:380)=4;tLstim(:,819:834)=4;tLstim(:,933:948)=4;tLstim(:,1046:1061)=4;tLstim(:,1103:1118)=4;tLstim(:,1557:1572)=4;tLstim(:,1671:1686)=4;tLstim(:,1785:1800)=4;tLstim(:,1899:1914)=4;tLstim(:,1955:1970)=4;
+
+**Motion key:
+Forward - forward (always binocular)
+Right - Times where left eye right motion and right eye right motion are both on (binocular)
+Medial Right - Left eye Right motion on only (monocular)
+Lateral Right - Right eye Right motion on only (monocular)
+Backward - backward (always binocular)
+Left - Times where left eye left motion and right eye left motion are both on (binocular)
+Medial left - Right eye Left motion on only (monocular)
+Lateral left - Left eye Left motion on only (monocular)
+Inward - Left eye Right motion and Right eye left motion are both on (binocular)
+Outward - Left eye Left motion and Right eye right motion are both on (binocular)
 %}
 
 tLStim = zeros(1, 2000);
@@ -95,30 +115,6 @@ tLStim(:,1615:1630)=4;
 tLStim(:,1842:1857)=4;
 
 tRStim = zeros(1,2000);
-
-%{
-tRstim(:,1387:1402)=1;
-tRstim(:,81:96)=2;
-tRstim(:,251:266)=2;
-tRstim(:,365:380)=2;
-tRstim(:,535:550)=2;
-tRstim(:,819:834)=2;
-tRstim(:,1103:1118)=2;
-tRstim(:,1273:1288)=2;
-tRstim(:,1330:1345)=2;
-tRstim(:,1443:1458)=2;
-tRstim(:,1557:1572)=2;
-tRstim(:,24:39)=3;
-tRstim(:,990:1005)=3;
-tRstim(:,1160:1175)=3;
-tRstim(:,1501:1516)=3;
-tRstim(:,137:152)=4;
-tRstim(:,421:436)=4;
-tRstim(:,706:721)=4;
-tRstim(:,1217:1232)=4;
-tRstim(:,1615:1630)=4;
-tRstim(:,1842:1857)=4;
-%}
 
 tRStim(:,592:607)=1;
 tRStim(:,876:891)=1;
